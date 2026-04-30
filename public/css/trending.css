@@ -8,6 +8,7 @@ body,html{
     /* cursor: none; */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    perspective: 1000px;
 }
 
 /* Optimize image loading and rendering */
@@ -75,6 +76,40 @@ img {
         opacity: 0;
     }
   }
+
+/* Page transition animations - similar to book page flip */
+@keyframes pageExit {
+    0% {
+        opacity: 1;
+        transform: translateX(0) rotateY(0deg);
+    }
+    100% {
+        opacity: 0.3;
+        transform: translateX(-40px) rotateY(-15deg);
+    }
+}
+
+@keyframes pageEnter {
+    0% {
+        opacity: 0.3;
+        transform: translateX(40px) rotateY(15deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0) rotateY(0deg);
+    }
+}
+
+/* Apply transitions to main content area */
+.pic.transitioning {
+    animation: pageExit 0.6s ease-in-out forwards;
+    backface-visibility: hidden;
+}
+
+.pic.entering {
+    animation: pageEnter 0.6s ease-in-out forwards;
+    backface-visibility: hidden;
+}
 h1{
     color: #F0EBEB;
     font-size: 56px;
@@ -319,6 +354,7 @@ h3 span{
     height: 100%;
     transition: 0.4s;
     animation: pic ease-in-out 2s;
+    transform-style: preserve-3d;
 }
 
 @keyframes pic{

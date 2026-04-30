@@ -266,6 +266,20 @@
         } 
         else if(flag ==='MORE'){
         
+        // Apply page transition effect
+        var picElement = document.querySelector('.pic');
+        picElement.classList.add('transitioning');
+        
+        // Remove transitioning class after animation and add entering class
+        setTimeout(function() {
+            picElement.classList.remove('transitioning');
+            picElement.classList.add('entering');
+        }, 300); // Halfway through the transition
+        
+        // Remove entering class after animation completes
+        setTimeout(function() {
+            picElement.classList.remove('entering');
+        }, 900); // After both animations complete
        
         var ans=0
         document.querySelector('.trendnumber').style.color="ffffff";
