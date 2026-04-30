@@ -4,17 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>See what's trending</title>
-    <meta name="description" content="Discover the top trending movies and TV shows of the week">
-    <!-- Preload critical resources -->
-    <link rel="preload" as="style" href="/css/trending.css">
-    <!-- DNS prefetch for external APIs -->
-    <link rel="dns-prefetch" href="https://api.themoviedb.org">
-    <link rel="dns-prefetch" href="https://image.tmdb.org">
-    <link rel="dns-prefetch" href="https://www.youtube.com">
-    <!-- Preconnect for faster connections -->
-    <link rel="preconnect" href="https://api.themoviedb.org">
-    <link rel="preconnect" href="https://image.tmdb.org">
-    <!-- Load fonts with swap strategy for better FCP -->
     <link rel="stylesheet" href="/css/trending.css">
     <link rel="icon" type="image/svg" href="https://res.cloudinary.com/dsi0a9weg/image/upload/v1607632566/icon_oqz5n8.png">
    
@@ -107,7 +96,7 @@
     <!-- <div class="cursor"></div> -->
 </body>
 
-<script defer>
+<script>
     document.onreadystatechange = function() { 
     if (document.readyState !== "complete") { 
         document.querySelector("body").style.visibility = "hidden"; 
@@ -118,35 +107,29 @@
             console.log('waiting');
             document.querySelector("#loader").style.visibility = "hidden";         
               document.querySelector("body").style.visibility = "visible";
-        }, 800); // Reduced from 1000 to 800ms
+        }, 1000);
         
     } 
 }; 
 </script>
 
 
-<script defer>
+<script>
     function initial(){
         var index = Math.floor(Math.random()*20);
     
         fetch('https://api.themoviedb.org/3/trending/all/day?api_key=<%= key %>')
         .then(response =>response.json() )
         .then(function (data){
-            // Use w780 instead of original for better performance (up to 98% smaller)
-            var image = `https://image.tmdb.org/t/p/w780${data.results[index].backdrop_path}`;
-            // Preload image before setting as background
-            var img = new Image();
-            img.onload = function() {
-                document.querySelector('.pic').style.backgroundImage=`linear-gradient(180deg, rgba(10, 10, 10, 0) 13.99%, #0A0A0A 100%),url(${image})`;
-            };
-            img.src = image;
+            var image = `https://image.tmdb.org/t/p/original${data.results[index].backdrop_path}`;
+            document.querySelector('.pic').style.backgroundImage=`linear-gradient(180deg, rgba(10, 10, 10, 0) 13.99%, #0A0A0A 100%),url(${image})`;
         });
 
     };
 </script>
 
-<script defer>
-    function formatDate(d) 
+<script>
+     function formatDate(d) 
         {
           var date = new Date(d);
 
@@ -269,7 +252,7 @@
              function(res){
                
                     
-                            iid  = `https://image.tmdb.org/t/p/w780${res.results[0].backdrop_path}`;
+                            iid  = `https://image.tmdb.org/t/p/original${res.results[0].backdrop_path}`;
                             console.log(iid);
                             document.getElementById('des').innerText=res.results[0].overview;
                             if(res.results[0].media_type.localeCompare('movie')===0){ // for movvie
@@ -280,9 +263,7 @@
                                     for(let i=1;i<=4;i++)
                                     {
                                         document.getElementById(`name${i}`).innerText=`${t.cast[i-1].name} AS ${t.cast[i-1].character}`;
-                                        // Use w342 instead of original for profile images (significantly smaller)
-                                        var profileImg = `https://image.tmdb.org/t/p/w342${t.cast[i-1].profile_path}`;
-                                        document.getElementById(`card${i}`).style.backgroundImage= `linear-gradient(180deg, rgba(10, 10, 10, 0) 13.99%, #0A0A0A 100%),url('${profileImg}')`;
+                                        document.getElementById(`card${i}`).style.backgroundImage= `linear-gradient(180deg, rgba(10, 10, 10, 0) 13.99%, #0A0A0A 100%),url('https://image.tmdb.org/t/p/original${t.cast[i-1].profile_path}')`;  
                                     }
                                 })
 
@@ -317,9 +298,7 @@
                                     for(let i=1;i<=4;i++)
                                     {
                                         document.getElementById(`name${i}`).innerText=`${t.cast[i-1].name} AS ${t.cast[i-1].character}`;
-                                        // Use w342 instead of original for profile images (significantly smaller)
-                                        var profileImg = `https://image.tmdb.org/t/p/w342${t.cast[i-1].profile_path}`;
-                                        document.getElementById(`card${i}`).style.backgroundImage= `linear-gradient(180deg, rgba(10, 10, 10, 0) 13.99%, #0A0A0A 100%),url('${profileImg}')`;
+                                        document.getElementById(`card${i}`).style.backgroundImage= `linear-gradient(180deg, rgba(10, 10, 10, 0) 13.99%, #0A0A0A 100%),url('https://image.tmdb.org/t/p/original${t.cast[i-1].profile_path}')`;  
                                     }
                                 })
                                 fetch(`https://api.themoviedb.org/3/tv/${res.results[0].id}/videos?api_key=<%= key %>&language=en-US`)
@@ -433,107 +412,101 @@
 
 
 
-<script defer>
-    // Debounced scroll handler for better performance
-    let scrollTimeout;
-    function onScroll() {
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(() => {
-            var content = document.querySelector('.content');
-            var image = document.querySelector('.pic');
-            var scroll_position = window.scrollY;
+<script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+<script>
 
-            if (scroll_position > 390) {
-                content.style.backgroundColor = "#1b1b1b";
-                content.style.transition = '0.4s';
-                document.querySelector('.des').style.opacity = "0.9";
-                document.querySelector('.cast').style.opacity = "0.9";
-                document.querySelector('.cast').style.transition = '0.4s';
-                document.querySelector('.des').style.transition = '0.4s';
-                document.querySelector('#card1').style.opacity = "0.9";
-                document.querySelector('#card2').style.opacity = "0.9";
-                document.querySelector('#card3').style.opacity = "0.9";
-                document.querySelector('#card4').style.opacity = "0.9";
-                document.querySelector('#card1').style.transition = '1s';
-                document.querySelector('#card2').style.transition = '2.5s';
-                document.querySelector('#card3').style.transition = '4s';
-                document.querySelector('#card4').style.transition = '5.5s';
-            } else if (scroll_position > 20) {
-                image.style.backgroundPosition = "100% 50%";
-                image.style.transition = '0.4s';
-            } else {
-                image.style.backgroundPosition = "50% 50%";
-                content.style.backgroundColor = "#0a0a0a";
-                content.style.transition = '0.4s';
-                image.style.transition = '0.4s';
-                document.querySelector('.des').style.opacity = "0";
-                document.querySelector('.des').style.transition = '0.4s';
-                document.querySelector('.cast').style.opacity = "0";
-                document.querySelector('.cast').style.transition = '0.4s';
-                document.querySelector('#card1').style.opacity = "0";
-                document.querySelector('#card2').style.opacity = "0";
-                document.querySelector('#card3').style.opacity = "0";
-                document.querySelector('#card4').style.opacity = "0";
-                document.querySelector('#card1').style.transition = '0.4s';
-                document.querySelector('#card2').style.transition = '0.4s';
-                document.querySelector('#card3').style.transition = '0.4s';
-                document.querySelector('#card4').style.transition = '0.4s';
-            }
-        }, 100); // Execute at most once per 100ms
-    }
-
-    document.addEventListener('scroll', onScroll, { passive: true });
-
-    // Smooth scroll animation without jQuery
-    function smoothScroll(target) {
-        const startPosition = window.scrollY;
-        const distance = target - startPosition;
-        const duration = 1000;
-        let start = null;
-
-        window.requestAnimationFrame(function step(timestamp) {
-            if (!start) start = timestamp;
-            const progress = (timestamp - start) / duration;
-            
-            if (progress < 1) {
-                window.scrollTo(0, startPosition + distance * easeInOutQuad(progress));
-                window.requestAnimationFrame(step);
-            } else {
-                window.scrollTo(0, target);
-            }
-        });
-    }
-
-    // Easing function for smooth animation
-    function easeInOutQuad(t) {
-        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-    }
 
     function clck(){
         var flag = document.querySelector('.more').innerHTML;
         if(flag === 'LESS'){
             document.querySelector('.net').disabled=false;
-            document.querySelector('.content').display="block";
-            document.querySelector('.more').innerHTML='MORE';
-            document.querySelector('.nextm').style.opacity=1;
-            document.querySelector('.foot1').disabled=true;
-            
-            smoothScroll(0);
+            async function f() {
+                document.querySelector('.content').display="block";
+                // document.querySelector('.pic1').style.transition="0.4s";
+                document.querySelector('.more').innerHTML='MORE';
+                // document.querySelector('.content').style.transition="0.4s";
+                document.querySelector('.nextm').style.opacity=1;
+                document.querySelector('.foot1').disabled=true;
+                // document.querySelector('.nextm').style.transition="0.4s";
+               $('html,body').animate({ scrollTop: 0}, 1000);
 
-            setTimeout(() => {
-                document.querySelector('.foot1').disabled=false;
-                document.querySelector('.pic1').style.display="none";
-            }, 1000);
+
+            let promise = new Promise((resolve, reject) => {
+
+                setTimeout(() => resolve("done!"), 1000)
+            });
+
+            let result = await promise; 
+            document.querySelector('.foot1').disabled=false;
+            document.querySelector('.pic1').style.display="none";
+            
+            }
+
+            f();
+               
         }
         else{
             document.querySelector('.net').disabled=true;
             document.querySelector('.pic1').style.display="block";
+            // document.querySelector('.pic1').style.transition="0.4s";
             document.querySelector('.more').innerHTML='LESS';
             document.querySelector('.content').display="none";
+            // document.querySelector('.content').style.transition="0.4s";
             document.querySelector('.nextm').style.opacity=0.01;
-            smoothScroll(document.body.scrollHeight);
+            // document.querySelector('.nextm').style.transition="0.4s";
+            $('html,body').animate({ scrollTop: $(document).height() }, 1000);
+            // window.scrollTo({top: $(document).height(), behavior: 'smooth'});
         }
+        
     }
-</script>
+
+   
+    document.addEventListener('scroll', () => {
+    var content = document.querySelector('.content');
+    var image = document.querySelector('.pic');
+    var scroll_position = window.scrollY;
+
+    if (scroll_position >390) {
+      content.style.backgroundColor="#1b1b1b";
+      content.style.transition='0.4s';
+      document.querySelector('.des').style.opacity="0.9";
+      document.querySelector('.cast').style.opacity="0.9";
+      document.querySelector('.cast').style.transition='0.4s';
+      document.querySelector('.des').style.transition='0.4s';
+      document.querySelector('#card1').style.opacity="0.9";
+      document.querySelector('#card2').style.opacity="0.9";
+      document.querySelector('#card3').style.opacity="0.9";
+      document.querySelector('#card4').style.opacity="0.9";
+      document.querySelector('#card1').style.transition='1s';
+      document.querySelector('#card2').style.transition='2.5s';
+      document.querySelector('#card3').style.transition='4s';
+      document.querySelector('#card4').style.transition='5.5s';
+    } 
+
+    else if (scroll_position >20){
+        image.style.backgroundPosition="100% 50%";
+        image.style.transition='0.4s';
+    }
+
+    else {
+        image.style.backgroundPosition="50% 50%";
+        content.style.backgroundColor="#0a0a0a";
+        content.style.transition='0.4s';
+        image.style.transition='0.4s';
+        document.querySelector('.des').style.opacity="0";
+        document.querySelector('.des').style.transition='0.4s';
+        document.querySelector('.cast').style.opacity="0";
+        document.querySelector('.cast').style.transition='0.4s';
+        document.querySelector('#card1').style.opacity="0";
+        document.querySelector('#card2').style.opacity="0";
+        document.querySelector('#card3').style.opacity="0";
+        document.querySelector('#card4').style.opacity="0";
+        document.querySelector('#card1').style.transition='0.4s';
+        document.querySelector('#card2').style.transition='0.4s';
+        document.querySelector('#card3').style.transition='0.4s';
+        document.querySelector('#card4').style.transition='0.4s';
+    }
+    
+  });
 </script>
 </html>
