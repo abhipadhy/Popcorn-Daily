@@ -220,11 +220,30 @@
             drop.style.display="none";
         }
     }
+    
+    // Throttle variable for scroll wheel events
+    let scrollWheelThrottle = false;
+    const SCROLL_THROTTLE_TIME = 800; // milliseconds - minimum time between scroll triggers
+    
     document.querySelector('body').onkeydown=function (e){
         if(e.keyCode === 39 || e.keyCode === 40){
             data();
         }
     };
+    
+    // Add scroll wheel listener for smooth content browsing
+    document.addEventListener('wheel', function(e) {
+        // Only trigger on scroll down (deltaY > 0)
+        if (e.deltaY > 0 && !scrollWheelThrottle) {
+            scrollWheelThrottle = true;
+            data();
+            
+            // Reset throttle after delay
+            setTimeout(function() {
+                scrollWheelThrottle = false;
+            }, SCROLL_THROTTLE_TIME);
+        }
+    }, { passive: true }); // passive for better scroll performance
 
     function data(){
 
