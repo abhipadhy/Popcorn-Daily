@@ -6,6 +6,9 @@
     <title>See what's trending</title>
     <link rel="stylesheet" href="/css/trending.css">
     <link rel="icon" type="image/svg" href="https://res.cloudinary.com/dsi0a9weg/image/upload/v1607632566/icon_oqz5n8.png">
+    <!-- Resource hints for faster image loading -->
+    <link rel="dns-prefetch" href="//image.tmdb.org">
+    <link rel="preconnect" href="https://image.tmdb.org" crossorigin>
    
 </head>
 <body  onkeydown="data()" id='bodyi' onload="initial()" style="visibility: visible;">
@@ -69,10 +72,10 @@
             <span class="lead">LEAD &nbsp;</span><span class="cast1">CAST</span>
         </div><br><br>
         <div class="actors">
-            <div class="card" id="card1"><p id="name1">Joaquin Phoneix</p></div>
-            <div class="card" id="card2"><p id="name2">Joaquin Phoneix</p></div>
-            <div class="card" id="card3"><p id="name3">Joaquin Phoneix</p></div>
-            <div class="card" id="card4"><p id="name4">Joaquin Phoneix</p></div>
+            <div class="card" id="card1" data-lazy="true"><p id="name1">Joaquin Phoneix</p></div>
+            <div class="card" id="card2" data-lazy="true"><p id="name2">Joaquin Phoneix</p></div>
+            <div class="card" id="card3" data-lazy="true"><p id="name3">Joaquin Phoneix</p></div>
+            <div class="card" id="card4" data-lazy="true"><p id="name4">Joaquin Phoneix</p></div>
         </div>
     </div>
 
@@ -97,6 +100,39 @@
 </body>
 
 <script>
+    // Image lazy loading with Intersection Observer API
+    let imageObserver;
+    function initImageLazyLoading() {
+        const options = {
+            root: null,
+            rootMargin: '50px', // Load images 50px before they become visible
+            threshold: 0.01
+        };
+
+        imageObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const element = entry.target;
+                    if (element.dataset.backgroundImage) {
+                        // For background images, load them before applying
+                        const img = new Image();
+                        img.onload = () => {
+                            element.style.backgroundImage = element.dataset.backgroundImage;
+                            element.removeAttribute('data-lazy');
+                        };
+                        img.onerror = () => {
+                            // Fallback if image fails
+                            element.style.backgroundImage = element.dataset.backgroundImage;
+                            element.removeAttribute('data-lazy');
+                        };
+                        img.src = element.dataset.backgroundImage.match(/url\('([^']+)'\)/)[1];
+                    }
+                    imageObserver.unobserve(element);
+                }
+            });
+        }, options);
+    }
+
     document.onreadystatechange = function() { 
     if (document.readyState !== "complete") { 
         document.querySelector("body").style.visibility = "hidden"; 
@@ -107,6 +143,7 @@
             console.log('waiting');
             document.querySelector("#loader").style.visibility = "hidden";         
               document.querySelector("body").style.visibility = "visible";
+            initImageLazyLoading();
         }, 1000);
         
     } 
@@ -122,8 +159,13 @@
         .then(response =>response.json() )
         .then(function (data){
             var image = `https://image.tmdb.org/t/p/original${data.results[index].backdrop_path}`;
-            document.querySelector('.pic').style.backgroundImage=`linear-gradient(180deg, rgba(10, 10, 10, 0) 13.99%, #0A0A0A 100%),url(${image})`;
-        });
+            // Preload the hero image for immediate visibility
+            var img = new Image();
+            img.onload = function() {
+                document.querySelector('.pic').style.backgroundImage=`linear-gradient(180deg, rgba(10, 10, 10, 0) 13.99%, #0A0A0A 100%),url(${image})`;
+            };
+            img.src = image;
+        }).catch(error => console.log('Error loading initial image:', error));
 
     };
 </script>
@@ -263,7 +305,16 @@
                                     for(let i=1;i<=4;i++)
                                     {
                                         document.getElementById(`name${i}`).innerText=`${t.cast[i-1].name} AS ${t.cast[i-1].character}`;
-                                        document.getElementById(`card${i}`).style.backgroundImage= `linear-gradient(180deg, rgba(10, 10, 10, 0) 13.99%, #0A0A0A 100%),url('https://image.tmdb.org/t/p/original${t.cast[i-1].profile_path}')`;  
+                                        const bgImageUrl = `linear-gradient(180deg, rgba(10, 10, 10, 0) 13.99%, #0A0A0A 100%),url('https://image.tmdb.org/t/p/original${t.cast[i-1].profile_path}')`;
+                                        const cardElement = document.getElementById(`card${i}`);
+                                        if (cardElement.getAttribute('data-lazy')) {
+                                            // For lazy loaded images, store the background image and let observer handle it
+                                            cardElement.dataset.backgroundImage = bgImageUrl;
+                                            if (imageObserver) imageObserver.observe(cardElement);
+                                        } else {
+                                            // Fallback: set directly if observer not ready
+                                            cardElement.style.backgroundImage = bgImageUrl;
+                                        }
                                     }
                                 })
 
@@ -298,7 +349,16 @@
                                     for(let i=1;i<=4;i++)
                                     {
                                         document.getElementById(`name${i}`).innerText=`${t.cast[i-1].name} AS ${t.cast[i-1].character}`;
-                                        document.getElementById(`card${i}`).style.backgroundImage= `linear-gradient(180deg, rgba(10, 10, 10, 0) 13.99%, #0A0A0A 100%),url('https://image.tmdb.org/t/p/original${t.cast[i-1].profile_path}')`;  
+                                        const bgImageUrl = `linear-gradient(180deg, rgba(10, 10, 10, 0) 13.99%, #0A0A0A 100%),url('https://image.tmdb.org/t/p/original${t.cast[i-1].profile_path}')`;
+                                        const cardElement = document.getElementById(`card${i}`);
+                                        if (cardElement.getAttribute('data-lazy')) {
+                                            // For lazy loaded images, store the background image and let observer handle it
+                                            cardElement.dataset.backgroundImage = bgImageUrl;
+                                            if (imageObserver) imageObserver.observe(cardElement);
+                                        } else {
+                                            // Fallback: set directly if observer not ready
+                                            cardElement.style.backgroundImage = bgImageUrl;
+                                        }
                                     }
                                 })
                                 fetch(`https://api.themoviedb.org/3/tv/${res.results[0].id}/videos?api_key=<%= key %>&language=en-US`)

@@ -6,6 +6,15 @@ body,html{
     padding: 0;
     background-color: #0A0A0A;
     /* cursor: none; */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Optimize image loading and rendering */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
 }
 
 #loader { 
@@ -559,6 +568,8 @@ li:hover{
     height: 250px;
     border: 3px solid #D7D8D7;
     box-sizing: border-box;
+    background-attachment: local;
+    will-change: background-image;
 }
 
 button:disabled,
